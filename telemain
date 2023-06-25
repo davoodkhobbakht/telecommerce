@@ -1,0 +1,53 @@
+<?php
+
+// Telegram API token
+$telegramToken = 'YOUR_TELEGRAM_BOT_TOKEN';
+
+// WooCommerce API credentials
+$woocommerceUrl = 'YOUR_WOOCOMMERCE_API_URL';
+$consumerKey = 'YOUR_CONSUMER_KEY';
+$consumerSecret = 'YOUR_CONSUMER_SECRET';
+
+// Telegram webhook URL
+$telegramWebhookUrl = 'https://yourdomain.com/webhook.php';
+
+// Set up Telegram webhook
+$telegramApiUrl = 'https://api.telegram.org/bot' . $telegramToken . '/setWebhook?url=' . $telegramWebhookUrl;
+file_get_contents($telegramApiUrl);
+
+// Handle incoming Telegram webhook request
+$update = json_decode(file_get_contents('php://input'), true);
+$message = $update['message']['text'];
+$photo = isset($update['message']['photo']) ? $update['message']['photo'] : null;
+
+// Check if the message contains product information
+if (strpos($message, '/product') === 0 && $photo) {
+    // Extract product details from the message
+    preg_match('/\*(.*?)\*/', $message, $nameMatches);
+    preg_match('/\$(.*?)\$/', $message, $priceMatches);
+    
+    if (count($nameMatches) > 1 && count($priceMatches) > 1) {
+        $productName = $nameMatches[1];
+        $productPrice = $priceMatches[1];
+        
+        // Prepare product data for WooCommerce API
+        $productData = [
+            'name' => $productName,
+            'type' => 'simple',
+            'regular_price' => $productPrice,
+            'description' => 'Product description', // Replace with the actual description
+            // Add more product fields as needed
+        ];
+        
+        // Upload the image to WooCommerce
+        // (Remaining code remains the same)
+        
+        // Create the product using WooCommerce API
+        // (Remaining code remains the same)
+        
+        // Handle the result
+        // (Remaining code remains the same)
+    } else {
+        echo 'Failed to extract product details from the message.';
+    }
+}
